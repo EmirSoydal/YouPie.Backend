@@ -12,6 +12,4 @@ public interface IUserService
     Task<bool> Put(string id, User updatedUser);
     Task Delete();
     Task<bool> Delete(string id);
-
-
 }
