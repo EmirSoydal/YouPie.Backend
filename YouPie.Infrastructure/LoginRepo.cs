@@ -26,9 +26,9 @@ public class LoginRepo : ILoginRepo
         await _mongoCollection.InsertOneAsync(newUser);
     }
 
-    public async Task ChangePassword(string email, string password, User updatedUser)
+    public async Task ChangePassword(string id, User updatedUser)
     {
-        await _mongoCollection.ReplaceOneAsync(x => x.Email == email && x.Password == password, updatedUser);
+        await _mongoCollection.ReplaceOneAsync(x => x.Id == id, updatedUser);
     }
     
 }

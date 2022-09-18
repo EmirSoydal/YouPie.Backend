@@ -6,5 +6,5 @@ public interface ILoginRepo
 {
     Task<User?> Login(UserDto userDto);
     Task Register(User newUser);
-    Task ChangePassword(string email, string password, User updatedUser);
+    Task ChangePassword(string email, User updatedUser);
 }

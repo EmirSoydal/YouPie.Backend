@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using YouPie.Application.Interfaces;
 using YouPie.Core.Interfaces;
@@ -15,12 +16,16 @@ namespace YouPie.Application.Services;
 public class TokenService : ITokenService
 {
     private readonly ILoginRepo _repository;
+    private readonly IRepository<User> _userRepo;
     private readonly IConfiguration _configuration;
+    private readonly ILogger _logger;
 
-    public TokenService(ILoginRepo repository, IConfiguration configuration)
+    public TokenService(ILoginRepo repository, IConfiguration configuration, ILogger logger, IRepository<User> userRepo)
     {
         _repository = repository;
         _configuration = configuration;
+        _logger = logger;
+        _userRepo = userRepo;
     }
 
     public async Task<object?> Login(UserDto userData)
@@ -47,5 +52,27 @@ public class TokenService : ITokenService
             signingCredentials: signIn);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public async Task<bool> Register(User userData)
+    {
+        await _repository.Register(userData);
+        _logger.LogInformation("User has been created {Time}", DateTime.Now);
+        return true;
+    }
+
+    public async Task<bool> ChangePassword(string id, string newPassword)
+    {
+        var user = await _userRepo.GetAsync(id);
+        if (user is null)
+        {
+            _logger.LogWarning("User could not been found, no password change {Time}", DateTime.Now);
+            return false;
+        }
+
+        user.Password = newPassword;
+        await _repository.ChangePassword(id, user);
+        _logger.LogInformation("User's password has been updated {Time} {User}",DateTime.Now,user.Id);
+        return true;
     }
 }
